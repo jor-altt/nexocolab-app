@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from "react-native";
 import { supabase } from "../../lib/supabase";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
@@ -10,11 +10,14 @@ type Item = {
   category: string;
   user_id: string;
   available: boolean;
+  image_url?: string;
 };
+
 
 export default function HomeScreen() {
   const [items, setItems] = useState<Item[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadItems = async () => {
     const { data, error } = await supabase
@@ -43,6 +46,8 @@ export default function HomeScreen() {
       {
         item_id: item.id_uuid,
         owner_id: item.user_id,
+        requester_id: userId,
+        status: "pending",
       },
     ]);
 
@@ -52,6 +57,7 @@ export default function HomeScreen() {
     }
 
     Alert.alert("Listo", "Solicitud enviada");
+    await loadItems();
   };
 
 useFocusEffect(
@@ -82,16 +88,30 @@ useFocusEffect(
       }, [])
     );
 
+
+    const onRefresh = async () => {
+      setRefreshing(true);
+      await loadItems();
+      setRefreshing(false);
+    };
+
   return (
     <View style={styles.container}>
       <FlatList
         data={items}
         keyExtractor={(item) => item.id_uuid}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.meta}>Categoría: {item.category}</Text>
-
+            {item.image_url && (
+              <Image
+                source={{ uri: item.image_url }}
+                style={styles.image}
+              />
+            )}
             <TouchableOpacity
               style={styles.button}
               onPress={() => requestItem(item)}
@@ -106,6 +126,12 @@ useFocusEffect(
 }
 
 const styles = StyleSheet.create({
+  image: {
+  width: "100%",
+  height: 180,
+  borderRadius: 10,
+  marginTop: 8,
+  },
   container: { flex: 1, padding: 12 },
   card: {
     backgroundColor: "#1f2933",

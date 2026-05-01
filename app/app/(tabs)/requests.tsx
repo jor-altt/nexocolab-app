@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -21,6 +22,7 @@ export default function RequestsScreen() {
   const [received, setReceived] = useState<Request[]>([]);
   const [sent, setSent] = useState<Request[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const updateStatus = async (requestId: string, newStatus: string, itemId: string) => {
     console.log("Updating request:", requestId, newStatus);
@@ -79,26 +81,26 @@ export default function RequestsScreen() {
     if (sentData) setSent(sentData);
   };
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     const init = async () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const uid = sessionData.session?.user.id ?? null;
       setUserId(uid);
-      if (uid) loadRequests(uid);
+      if (uid) await loadRequests(uid);
     };
 
     init();
+  }, [])
+);
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      const uid = session?.user.id ?? null;
-      setUserId(uid);
-      if (uid) loadRequests(uid);
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (userId) {
+      await loadRequests(userId);
+    }
+    setRefreshing(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -109,6 +111,8 @@ export default function RequestsScreen() {
       ) : (
         <FlatList
           data={received}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.card}>
@@ -144,6 +148,8 @@ export default function RequestsScreen() {
       ) : (
         <FlatList
           data={sent}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.card}>
