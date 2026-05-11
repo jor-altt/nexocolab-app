@@ -137,3 +137,6 @@ https://github.com/Riidexx/nexocolab-app
 ## Autores
 
 Proyecto académico desarrollado por el equipo NexoColab.
+Maicol Cortes
+Jordan Espinosa 
+Andres Patiño
