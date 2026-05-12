@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Keyboard } from "react-native";
 import { supabase } from "../../lib/supabase";
 
 export default function ProfileScreen() {
@@ -21,18 +21,27 @@ export default function ProfileScreen() {
 
   const signUp = async () => {
     const { error } = await supabase.auth.signUp({ email, password });
-    if (error) Alert.alert("Error", error.message);
-    else Alert.alert("Listo", "Cuenta creada. Revisa correo.");
+    if (error) {
+      Alert.alert("Error", error.message);
+    } else {
+      Keyboard.dismiss(); // 👈 Cierra el teclado
+      Alert.alert("Listo", "Cuenta creada. Revisa correo.");
+    }
   };
 
   const signIn = async () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) Alert.alert("Error", error.message);
-    else Alert.alert("OK", "Sesión iniciada");
+    if (error) {
+      Alert.alert("Error", error.message);
+    } else {
+      Keyboard.dismiss(); // 👈 Cierra el teclado
+      Alert.alert("OK", "Sesión iniciada");
+    }
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    Keyboard.dismiss(); // 👈 Cierra el teclado
     Alert.alert("OK", "Sesión cerrada");
   };
 
