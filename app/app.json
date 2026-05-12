@@ -7,11 +7,30 @@
     "icon": "./assets/images/icon.png",
     "scheme": "nexocolab",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
     "android": {
-      "package": "com.riidexx.NexoColab"
+      "package": "com.riidexx.NexoColab",
+      "splash": {
+        "image": "./assets/images/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFFFFF"
+      }
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
